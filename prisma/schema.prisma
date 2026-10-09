@@ -1,0 +1,30 @@
+// Prisma schema for the income and expense ledger.
+// See https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Transaction {
+  id        String          @id @default(cuid())
+  type      TransactionType
+  title     String          @db.VarChar(120)
+  amount    Decimal         @db.Decimal(12, 2)
+  category  String          @db.VarChar(60)
+  date      DateTime        @db.Date
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([date])
+  @@index([type, date])
+}
