@@ -7,6 +7,7 @@ import { ArrowDownLeft, ArrowUpRight, Plus, ReceiptText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createTransaction } from "@/app/actions/transactions";
 import type { TransactionRecord, TransactionType } from "@/lib/transactions";
+import { useSession } from "@/lib/auth-client";
 
 const categories: Record<TransactionType, string[]> = {
   income: ["เงินเดือน", "งานเสริม", "การลงทุน", "อื่น ๆ"],
@@ -24,6 +25,12 @@ export default function TransactionForm({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { data: session, isPending } = useSession();
+
+  if (isPending) {
+    return <p className="mt-8 text-center">Loading...</p>;
+  }
+
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -37,7 +44,9 @@ export default function TransactionForm({
         return;
       }
 
-      setTransactions((current) => [result.transaction, ...current].slice(0, 10));
+      setTransactions((current) =>
+        [result.transaction, ...current].slice(0, 10),
+      );
       form.reset();
       router.refresh();
     } catch {
@@ -48,130 +57,138 @@ export default function TransactionForm({
   }
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-        <div className="mb-5">
-          <h2 className="text-lg font-semibold text-slate-800">เพิ่มรายการ</h2>
-          <p className="mt-1 text-sm text-slate-400">
-            บันทึกรายรับหรือรายจ่ายของคุณ
-          </p>
-        </div>
+    <section className="flex flex-col gap-6 md:flex-row">
+      {session?.user && (
+        <>
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 md:min-w-md">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-slate-800">
+                เพิ่มรายการ
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                บันทึกรายรับหรือรายจ่ายของคุณ
+              </p>
+            </div>
 
-        <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
-          <button
-            type="button"
-            onClick={() => setType("expense")}
-            aria-pressed={type === "expense"}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-              type === "expense"
-                ? "bg-white text-rose-600 shadow-sm"
-                : "text-slate-500 hover:text-slate-700",
-            )}
-          >
-            <ArrowUpRight className="h-4 w-4" /> รายจ่าย
-          </button>
-          <button
-            type="button"
-            onClick={() => setType("income")}
-            aria-pressed={type === "income"}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-              type === "income"
-                ? "bg-white text-emerald-600 shadow-sm"
-                : "text-slate-500 hover:text-slate-700",
-            )}
-          >
-            <ArrowDownLeft className="h-4 w-4" /> รายรับ
-          </button>
-        </div>
-
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <input type="hidden" name="type" value={type} />
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-600">
-              รายการ
-            </span>
-            <input
-              name="title"
-              required
-              maxLength={120}
-              placeholder={
-                type === "income" ? "เช่น เงินเดือน" : "เช่น ค่าอาหาร"
-              }
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition outline-none placeholder:text-slate-300 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
-            />
-          </label>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-slate-600">
-                จำนวนเงิน (บาท)
-              </span>
-              <input
-                name="amount"
-                type="number"
-                min="0.01"
-                max="9999999999.99"
-                step="0.01"
-                required
-                placeholder="0.00"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition outline-none placeholder:text-slate-300 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-slate-600">
-                หมวดหมู่
-              </span>
-              <select
-                key={type}
-                name="category"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
+            <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
+              <button
+                type="button"
+                onClick={() => setType("expense")}
+                aria-pressed={type === "expense"}
+                className={cn(
+                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                  type === "expense"
+                    ? "bg-white text-rose-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700",
+                )}
               >
-                {categories[type].map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <ArrowUpRight className="h-4 w-4" /> รายจ่าย
+              </button>
+              <button
+                type="button"
+                onClick={() => setType("income")}
+                aria-pressed={type === "income"}
+                className={cn(
+                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                  type === "income"
+                    ? "bg-white text-emerald-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700",
+                )}
+              >
+                <ArrowDownLeft className="h-4 w-4" /> รายรับ
+              </button>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <input type="hidden" name="type" value={type} />
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-slate-600">
+                  รายการ
+                </span>
+                <input
+                  name="title"
+                  required
+                  maxLength={120}
+                  placeholder={
+                    type === "income" ? "เช่น เงินเดือน" : "เช่น ค่าอาหาร"
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition outline-none placeholder:text-slate-300 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
+                />
+              </label>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-slate-600">
+                    จำนวนเงิน (บาท)
+                  </span>
+                  <input
+                    name="amount"
+                    type="number"
+                    min="0.01"
+                    max="9999999999.99"
+                    step="0.01"
+                    required
+                    placeholder="0.00"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm transition outline-none placeholder:text-slate-300 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-slate-600">
+                    หมวดหมู่
+                  </span>
+                  <select
+                    key={type}
+                    name="category"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
+                  >
+                    {categories[type].map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-slate-600">
+                  วันที่
+                </span>
+                <input
+                  name="date"
+                  type="date"
+                  required
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
+                />
+              </label>
+
+              {error && (
+                <p role="alert" className="text-sm font-medium text-rose-600">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSaving}
+                className={cn(
+                  "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition disabled:opacity-20",
+                  type === "income"
+                    ? "bg-emerald-500 hover:bg-emerald-600"
+                    : "bg-rose-500 hover:bg-rose-600",
+                )}
+              >
+                <Plus className="h-4 w-4" />
+                {isSaving
+                  ? "กำลังบันทึก..."
+                  : `บันทึก${type === "income" ? "รายรับ" : "รายจ่าย"}`}
+              </button>
+            </form>
           </div>
+        </>
+      )}
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-600">
-              วันที่
-            </span>
-            <input
-              name="date"
-              type="date"
-              required
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
-            />
-          </label>
-
-          {error && (
-            <p role="alert" className="text-sm font-medium text-rose-600">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSaving}
-            className={cn(
-              "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition",
-              type === "income"
-                ? "bg-emerald-500 hover:bg-emerald-600"
-                : "bg-rose-500 hover:bg-rose-600",
-            )}
-          >
-            <Plus className="h-4 w-4" />
-            {isSaving ? "กำลังบันทึก..." : `บันทึก${type === "income" ? "รายรับ" : "รายจ่าย"}`}
-          </button>
-        </form>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex-1 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-slate-800">
