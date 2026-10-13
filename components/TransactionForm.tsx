@@ -27,6 +27,15 @@ export default function TransactionForm({
 
   const { data: session, isPending } = useSession();
 
+  const getTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   if (isPending) {
     return <p className="mt-8 text-center">Loading...</p>;
   }
@@ -76,7 +85,7 @@ export default function TransactionForm({
                 onClick={() => setType("expense")}
                 aria-pressed={type === "expense"}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition hover:cursor-pointer",
                   type === "expense"
                     ? "bg-white text-rose-600 shadow-sm"
                     : "text-slate-500 hover:text-slate-700",
@@ -89,7 +98,7 @@ export default function TransactionForm({
                 onClick={() => setType("income")}
                 aria-pressed={type === "income"}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                  "flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
                   type === "income"
                     ? "bg-white text-emerald-600 shadow-sm"
                     : "text-slate-500 hover:text-slate-700",
@@ -158,6 +167,7 @@ export default function TransactionForm({
                   name="date"
                   type="date"
                   required
+                  defaultValue={getTodayString()}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 transition outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
                 />
               </label>
@@ -172,7 +182,7 @@ export default function TransactionForm({
                 type="submit"
                 disabled={isSaving}
                 className={cn(
-                  "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition disabled:opacity-20",
+                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition disabled:opacity-20",
                   type === "income"
                     ? "bg-emerald-500 hover:bg-emerald-600"
                     : "bg-rose-500 hover:bg-rose-600",

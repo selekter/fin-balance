@@ -33,17 +33,15 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
             name: String(formData.get("name") ?? "").trim(),
             email,
             password,
-            callbackURL: "/",
           })
-        : await signIn.email({ email, password, callbackURL: "/" });
+        : await signIn.email({ email, password });
 
       if (result.error) {
         setError(result.error.message || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
         return;
       }
 
-      router.replace("/");
-      router.refresh();
+      router.push("/");
     } catch {
       setError("ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
