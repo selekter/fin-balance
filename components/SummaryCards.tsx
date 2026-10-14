@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -40,7 +41,12 @@ export default function SummaryCards({
             <Wallet className="h-4 w-4" />
           </div>
         </div>
-        <div className={`mb-1 text-2xl font-bold tracking-tight ${netAmount < 0 ? "text-rose-500" : "text-slate-800"}`}>
+        <div
+          className={cn(
+            "mb-1 text-2xl font-bold tracking-tight",
+            netAmount < 0 ? "text-rose-500" : "text-slate-800",
+          )}
+        >
           ฿{formatAmount(netAmount)}
         </div>
         <div className="flex items-center gap-1 text-[11px] text-slate-400">
