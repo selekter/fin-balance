@@ -24,7 +24,8 @@ export async function getTransactionDashboardData() {
     }),
     prisma.transaction.findMany({
       where: { date: { gte: weekStart, lt: new Date(today.getTime() + 86400000) } },
-      select: { type: true, amount: true, date: true },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+      select: { id: true, type: true, title: true, category: true, amount: true, date: true },
     }),
     prisma.transaction.findMany({
       where: {
@@ -55,13 +56,21 @@ export async function getTransactionDashboardData() {
     const date = new Date(weekStart);
     date.setUTCDate(weekStart.getUTCDate() + index);
     const key = date.toISOString().slice(0, 10);
-    const totals = dailyTransactions
+    const transactions = dailyTransactions
       .filter((transaction) => transaction.date.toISOString().slice(0, 10) === key)
+      .map((transaction) => ({
+        id: transaction.id,
+        type: transaction.type === "INCOME" ? ("income" as const) : ("expense" as const),
+        title: transaction.title,
+        category: transaction.category,
+        amount: transaction.amount.toString(),
+      }));
+    const totals = transactions
       .reduce((result, transaction) => {
-        result[transaction.type === "INCOME" ? "income" : "expense"] += Number(transaction.amount.toString());
+        result[transaction.type] += Number(transaction.amount);
         return result;
       }, { income: 0, expense: 0 });
-    return { date: key, ...totals };
+    return { date: key, ...totals, transactions };
   });
 
   const months = Array.from({ length: 6 }, (_, index) => {
