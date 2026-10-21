@@ -11,36 +11,62 @@ type CreateTransactionResult =
 
 export async function getTransactionDashboardData() {
   const now = new Date();
-  const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const today = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+  );
   const weekStart = new Date(today);
   weekStart.setUTCDate(today.getUTCDate() - 6);
-  const monthsStart = new Date(Date.UTC(now.getFullYear(), now.getMonth() - 5, 1));
+  const monthsStart = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth() - 5, 1),
+  );
 
-  const [recentTransactions, dailyTransactions, monthlyTransactions] = await Promise.all([
-    prisma.transaction.findMany({
-      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
-      take: 10,
-      select: { id: true, type: true, title: true, category: true, amount: true, date: true },
-    }),
-    prisma.transaction.findMany({
-      where: { date: { gte: weekStart, lt: new Date(today.getTime() + 86400000) } },
-      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
-      select: { id: true, type: true, title: true, category: true, amount: true, date: true },
-    }),
-    prisma.transaction.findMany({
-      where: {
-        date: {
-          gte: monthsStart,
-          lt: new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 1)),
+  const [recentTransactions, dailyTransactions, monthlyTransactions] =
+    await Promise.all([
+      prisma.transaction.findMany({
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        take: 10,
+        select: {
+          id: true,
+          type: true,
+          title: true,
+          category: true,
+          amount: true,
+          date: true,
         },
-      },
-      select: { type: true, amount: true, date: true },
-    }),
-  ]);
+      }),
+      prisma.transaction.findMany({
+        where: {
+          date: { gte: weekStart, lt: new Date(today.getTime() + 86400000) },
+        },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          type: true,
+          title: true,
+          category: true,
+          amount: true,
+          date: true,
+        },
+      }),
+      prisma.transaction.findMany({
+        where: {
+          date: {
+            gte: monthsStart,
+            lt: new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 1)),
+          },
+        },
+        select: { type: true, amount: true, date: true },
+      }),
+    ]);
 
   const monthTotals = monthlyTransactions.reduce((totals, transaction) => {
     const key = `${transaction.date.getUTCFullYear()}-${String(transaction.date.getUTCMonth() + 1).padStart(2, "0")}`;
-    const total = totals.get(key) ?? { income: 0, expense: 0, incomeCount: 0, expenseCount: 0 };
+    const total = totals.get(key) ?? {
+      income: 0,
+      expense: 0,
+      incomeCount: 0,
+      expenseCount: 0,
+    };
     if (transaction.type === "INCOME") {
       total.income += Number(transaction.amount.toString());
       total.incomeCount += 1;
@@ -57,28 +83,42 @@ export async function getTransactionDashboardData() {
     date.setUTCDate(weekStart.getUTCDate() + index);
     const key = date.toISOString().slice(0, 10);
     const transactions = dailyTransactions
-      .filter((transaction) => transaction.date.toISOString().slice(0, 10) === key)
+      .filter(
+        (transaction) => transaction.date.toISOString().slice(0, 10) === key,
+      )
       .map((transaction) => ({
         id: transaction.id,
-        type: transaction.type === "INCOME" ? ("income" as const) : ("expense" as const),
+        type:
+          transaction.type === "INCOME"
+            ? ("income" as const)
+            : ("expense" as const),
         title: transaction.title,
         category: transaction.category,
         amount: transaction.amount.toString(),
       }));
-    const totals = transactions
-      .reduce((result, transaction) => {
+    const totals = transactions.reduce(
+      (result, transaction) => {
         result[transaction.type] += Number(transaction.amount);
         return result;
-      }, { income: 0, expense: 0 });
+      },
+      { income: 0, expense: 0 },
+    );
     return { date: key, ...totals, transactions };
   });
 
   const months = Array.from({ length: 6 }, (_, index) => {
-    const date = new Date(Date.UTC(now.getFullYear(), now.getMonth() - 5 + index, 1));
+    const date = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth() - 5 + index, 1),
+    );
     const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
     return {
       date: key,
-      ...(monthTotals.get(key) ?? { income: 0, expense: 0, incomeCount: 0, expenseCount: 0 }),
+      ...(monthTotals.get(key) ?? {
+        income: 0,
+        expense: 0,
+        incomeCount: 0,
+        expenseCount: 0,
+      }),
     };
   });
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -92,13 +132,104 @@ export async function getTransactionDashboardData() {
   return {
     transactions: recentTransactions.map((transaction) => ({
       ...transaction,
-      type: transaction.type === "INCOME" ? ("income" as const) : ("expense" as const),
+      type:
+        transaction.type === "INCOME"
+          ? ("income" as const)
+          : ("expense" as const),
       amount: transaction.amount.toString(),
       date: transaction.date.toISOString().slice(0, 10),
     })),
     days,
     months,
     currentMonth,
+  };
+}
+
+export async function getTransactionDashboardDataV2() {
+  const now = new Date();
+  const today = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+  );
+  const weekStart = new Date(today);
+  weekStart.setUTCDate(today.getUTCDate() - 6);
+  const monthsStart = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth() - 5, 1),
+  );
+
+  const monthlyAggregations = await prisma.transaction.groupBy({
+    by: ["type", "date"],
+    where: {
+      date: {
+        gte: monthsStart,
+        lte: new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 1)),
+      },
+    },
+    _sum: {
+      amount: true,
+    },
+    _count: {
+      id: true,
+    },
+  });
+
+  // 2. จัดกลุ่มข้อมูลตามเดือน "YYYY-MM"
+  const monthTotals = new Map<
+    string,
+    {
+      income: number;
+      expense: number;
+      incomeCount: number;
+      expenseCount: number;
+    }
+  >();
+
+  // monthlyAggregations.forEach((item) => {
+  //   const year = item.date.getFullYear();
+  //   const month = String(item.date.getUTCMonth() + 1).padStart(2, "0");
+  //   const key = `${year}-${month}`;
+
+  //   const total = monthTotals.get(key) ?? {
+  //     income: 0,
+  //     expense: 0,
+  //     incomeCount: 0,
+  //     expenseCount: 0,
+  //   };
+
+  //   const sumAmount = Number(item._sum.amount?.toString() ?? 0);
+  //   const count = item._count.id ?? 0;
+
+  //   if (item.type == "INCOME") {
+  //     total.income += sumAmount;
+  //     total.incomeCount += count;
+  //   } else {
+  //     total.expense += sumAmount;
+  //     total.expenseCount += count;
+  //   }
+
+  //   monthTotals.set(key, total);
+  // });
+
+  // 3. สร้าง Array ย้อนหลัง 6 เดือน
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth() - 5 + index, 1),
+    );
+
+    const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    return {
+      date: key,
+      ...(monthTotals.get(key) ?? {
+        income: 0,
+        expense: 0,
+        incomeCount: 0,
+        expenseCount: 0,
+      }),
+    };
+  });
+
+  return {
+    monthlyAggregations,
+    months,
   };
 }
 

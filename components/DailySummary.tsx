@@ -58,10 +58,10 @@ export default function DailySummary({ days }: { days: DailySummaryDay[] }) {
                   : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:bg-slate-50",
               )}
             >
-              <span className="block text-xs font-semibold">
+              <span className="block text-sm font-semibold">
                 {formatDate(day.date, { weekday: "short" })}
               </span>
-              <span className="mt-0.5 block text-xs">
+              <span className="mt-0.5 block text-sm">
                 {formatDate(day.date, { day: "numeric", month: "short" })}
               </span>
             </button>
@@ -73,13 +73,13 @@ export default function DailySummary({ days }: { days: DailySummaryDay[] }) {
           <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 text-center">
             <div>
               <p className="text-[11px] text-slate-400">รายรับ</p>
-              <p className="mt-1 text-xs font-semibold text-emerald-600 sm:text-sm">
+              <p className="mt-1 text-sm font-semibold text-emerald-600 sm:text-sm">
                 {currency(selectedDay.income)}
               </p>
             </div>
             <div>
               <p className="text-[11px] text-slate-400">รายจ่าย</p>
-              <p className="mt-1 text-xs font-semibold text-rose-500 sm:text-sm">
+              <p className="mt-1 text-sm font-semibold text-rose-500 sm:text-sm">
                 {currency(selectedDay.expense)}
               </p>
             </div>
@@ -87,7 +87,7 @@ export default function DailySummary({ days }: { days: DailySummaryDay[] }) {
               <p className="text-[11px] text-slate-400">สุทธิ</p>
               <p
                 className={cn(
-                  "mt-1 text-xs font-semibold sm:text-sm",
+                  "mt-1 text-sm font-semibold sm:text-sm",
                   selectedDay.income - selectedDay.expense >= 0
                     ? "text-blue-600"
                     : "text-rose-600",
@@ -113,7 +113,7 @@ export default function DailySummary({ days }: { days: DailySummaryDay[] }) {
                     <p className="truncate text-sm font-medium text-slate-700">
                       {transaction.title}
                     </p>
-                    <p className="truncate text-xs text-slate-400">
+                    <p className="truncate text-sm text-slate-400">
                       {transaction.category}
                     </p>
                   </div>

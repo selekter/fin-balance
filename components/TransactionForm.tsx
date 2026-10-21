@@ -242,23 +242,23 @@ export default function TransactionForm({
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-700">
+                    <p className="truncate text-sm text-slate-700">
                       {transaction.title}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-400">
                       {transaction.category} · {transaction.date}
                     </p>
                   </div>
                 </div>
                 <span
                   className={cn(
-                    "shrink-0 text-sm font-semibold",
+                    "shrink-0 text-sm",
                     transaction.type === "income"
                       ? "text-emerald-600"
                       : "text-rose-600",
                   )}
                 >
-                  {transaction.type === "income" ? "+" : "−"}
+                  {transaction.type === "income" ? "+" : "−"}฿
                   {Number(transaction.amount).toLocaleString("th-TH", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
