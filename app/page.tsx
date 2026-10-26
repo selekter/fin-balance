@@ -7,6 +7,7 @@ import {
   // getTransactionDashboardDataV2,
 } from "@/app/actions/transactions";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const currency = (amount: number) =>
   `\u0e3f${amount.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -61,7 +62,12 @@ export default async function App() {
                         {monthLabel(month.date)}
                       </p>
                       <p
-                        className={`mt-0.5 text-sm font-medium ${month.income - month.expense >= 0 ? "text-emerald-600" : "text-rose-500"}`}
+                        className={cn(
+                          "mt-0.5 text-sm font-medium",
+                          month.income - month.expense >= 0
+                            ? "text-emerald-600"
+                            : "text-rose-500",
+                        )}
                       >
                         สุทธิ {currency(month.income - month.expense)}
                       </p>
