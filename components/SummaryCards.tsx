@@ -1,18 +1,10 @@
 import { cn } from "@/lib/utils";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Info,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
-} from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Info, Wallet } from "lucide-react";
 
 interface SummaryCardsProps {
-  incomeAmount: number;
-  incomeCount: number;
-  expenseAmount: number;
-  expenseCount: number;
+  incomeAmount?: number;
+  expenseAmount?: number;
+  balanceTotal?: number;
 }
 
 const formatAmount = (amount: number) =>
@@ -22,13 +14,10 @@ const formatAmount = (amount: number) =>
   });
 
 export default function SummaryCards({
-  incomeAmount,
-  incomeCount,
-  expenseAmount,
-  expenseCount,
+  incomeAmount = 0,
+  expenseAmount = 0,
+  balanceTotal = 0,
 }: SummaryCardsProps) {
-  const netAmount = incomeAmount - expenseAmount;
-
   return (
     <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
       {/* Net Balance */}
@@ -44,10 +33,10 @@ export default function SummaryCards({
         <div
           className={cn(
             "mb-1 text-2xl font-bold tracking-tight",
-            netAmount < 0 ? "text-rose-500" : "text-slate-800",
+            balanceTotal < 0 ? "text-rose-500" : "text-slate-800",
           )}
         >
-          ฿{formatAmount(netAmount)}
+          ฿{formatAmount(balanceTotal)}
         </div>
         <div className="flex items-center gap-1 text-[11px] text-slate-400">
           <Info className="h-3 w-3 text-blue-500" />
@@ -67,10 +56,6 @@ export default function SummaryCards({
         <div className="mb-1 text-2xl font-bold tracking-tight text-emerald-500">
           ฿{formatAmount(incomeAmount)}
         </div>
-        <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-500/80">
-          <TrendingUp className="h-3 w-3" />
-          <span>{incomeCount} รายการบันทึก</span>
-        </div>
         <div className="absolute right-0 bottom-0 left-0 h-1 bg-emerald-500" />
       </div>
 
@@ -84,10 +69,6 @@ export default function SummaryCards({
         </div>
         <div className="mb-1 text-2xl font-bold tracking-tight text-rose-500">
           ฿{formatAmount(expenseAmount)}
-        </div>
-        <div className="flex items-center gap-1 text-[11px] font-medium text-rose-500/80">
-          <TrendingDown className="h-3 w-3" />
-          <span>{expenseCount} รายการบันทึก</span>
         </div>
         <div className="absolute right-0 bottom-0 left-0 h-1 bg-rose-500" />
       </div>

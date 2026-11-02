@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { SubmitEvent } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -31,7 +31,7 @@ export default function TransactionForm({
 }: {
   initialTransactions: TransactionRecord[];
 }) {
-  const router = useRouter();
+  // const router = useRouter();
   const [type, setType] = useState<TransactionType>("expense");
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,7 +82,6 @@ export default function TransactionForm({
         [result.transaction, ...current].slice(0, 10),
       );
       form.reset();
-      router.refresh();
     } catch {
       setError("บันทึกรายการไม่สำเร็จ กรุณาลองอีกครั้ง");
     } finally {

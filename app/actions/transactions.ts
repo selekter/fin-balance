@@ -145,6 +145,46 @@ export async function getTransactionDashboardData() {
   };
 }
 
+export async function getTransactionTotals() {
+  try {
+    const result = await prisma.transaction.groupBy({
+      by: ["type"],
+      _sum: {
+        amount: true,
+      },
+    });
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    result.forEach((item) => {
+      const sumAmount = item._sum.amount ? Number(item._sum.amount) : 0;
+      if (item.type === "INCOME") {
+        totalIncome = sumAmount;
+      } else if (item.type === "EXPENSE") {
+        totalExpense = sumAmount;
+      }
+    });
+
+    return {
+      totalIncome,
+      totalExpense,
+      balance: totalIncome - totalExpense, //ยอดตงเหลือ
+    };
+  } catch (error) {
+    console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลสรุป:", error);
+
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ",
+      data: { totalIncome: 0, totalExpense: 0, balance: 0 },
+    };
+  }
+}
+
 export async function getTransactionDashboardDataV2() {
   const now = new Date();
   const today = new Date(

@@ -4,6 +4,7 @@ import TransactionForm from "@/components/TransactionForm";
 import DailySummary from "@/components/DailySummary";
 import {
   getTransactionDashboardData,
+  getTransactionTotals,
   // getTransactionDashboardDataV2,
 } from "@/app/actions/transactions";
 import { TrendingDown, TrendingUp } from "lucide-react";
@@ -20,11 +21,9 @@ const monthLabel = (month: string) =>
   }).format(new Date(`${month}-01T00:00:00.000Z`));
 
 export default async function App() {
-  const { transactions, days, months, currentMonth } =
-    await getTransactionDashboardData();
-  // const { monthlyAggregations } = await getTransactionDashboardDataV2();
+  const { transactions, days, months } = await getTransactionDashboardData();
 
-  // console.log(monthlyAggregations);
+  const summary = await getTransactionTotals();
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 transition-colors duration-200">
@@ -32,10 +31,9 @@ export default async function App() {
       {/* Main Content */}
       <main className="mx-auto w-full max-w-7xl grow px-4 py-8 sm:px-6 lg:px-8">
         <SummaryCards
-          incomeAmount={currentMonth.income}
-          incomeCount={currentMonth.incomeCount}
-          expenseAmount={currentMonth.expense}
-          expenseCount={currentMonth.expenseCount}
+          incomeAmount={summary.totalIncome}
+          expenseAmount={summary.totalExpense}
+          balanceTotal={summary.balance}
         />
         <section className="mb-8 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
           <DailySummary days={days} />
